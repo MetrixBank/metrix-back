@@ -62,9 +62,14 @@ const asaasCustomers = new CustomersResource(asaasSDK.config);
 const asaasAccounts = new AccountsResource(asaasSDK.config);
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-// Rota de teste
+// Health check simples
 app.get('/', (req, res) => {
-  res.send('API MetrixBank Rodando!');
+  res.status(200).json({
+    status: 'ok',
+    service: 'metrix-back',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Cria subconta no Asaas e salva o retorno no Supabase.
