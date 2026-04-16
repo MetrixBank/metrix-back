@@ -43,13 +43,21 @@ class AccountsResource extends GenericResource {
 }
 
 class PaymentsResource extends GenericResource {
-    constructor(configFn) {
-        super(configFn);
-        this.resource = '/payments';
-    }
+  constructor(configFn) {
+    super(configFn);
+    this.resource = '/payments';
+  }
 }
-  
+
+class CustomersResource extends GenericResource {
+  constructor(configFn) {
+    super(configFn);
+    this.resource = '/customers';
+  }
+}
+
 const asaasPayments = new PaymentsResource(asaasSDK.config);
+const asaasCustomers = new CustomersResource(asaasSDK.config);
 
 const asaasAccounts = new AccountsResource(asaasSDK.config);
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -151,6 +159,24 @@ app.post('/gerar-boleto', async (req, res) => {
     });
   }
 });
+
+// Rota para criar o PAGADOR (Customer)
+app.post('/criar-cliente', async (req, res) => {
+    try {
+      const asaasResponse = await asaasCustomers.post(req.body);
+      res.status(201).json(asaasResponse.data);
+    } catch (error) {
+      // Pega os erros específicos que o Asaas retorna
+      const asaasErrors = error?.response?.data?.errors || [];
+      console.log('--- ERRO NO ASAAS ---');
+      console.log(JSON.stringify(asaasErrors, null, 2));
+      
+      res.status(error?.response?.status || 500).json({ 
+        error: 'Erro na API do Asaas', 
+        details: asaasErrors 
+      });
+    }
+});  
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
